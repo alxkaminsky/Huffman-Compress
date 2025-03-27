@@ -14,9 +14,7 @@ Copyright (c) 2025 Bogdan Simion, Dan Zingaro
 """
 from __future__ import annotations
 
-import heapq
 import time
-
 from huffman import HuffmanTree
 from utils import *
 
@@ -122,6 +120,7 @@ def number_nodes(tree: HuffmanTree) -> None:
     >>> tree.number
     3
     """
+
     def _number_nodes_helper(huffman: HuffmanTree, counter: list) -> None:
         #TODO put in the docstring
         """
@@ -160,7 +159,7 @@ def avg_length(tree: HuffmanTree, freq_dict: dict[int, int]) -> float:
         freq = freq_dict[key]
         numerator += (len(d[key]) * freq)
         denominator += freq
-    return numerator/denominator
+    return numerator / denominator
 
 
 def compress_bytes(text: bytes, codes: dict[int, str]) -> bytes:
@@ -185,7 +184,7 @@ def compress_bytes(text: bytes, codes: dict[int, str]) -> bytes:
         temp += codes[b]
     if temp:
         for i in range(0, len(temp), 8):
-            ret.append(bits_to_byte(temp[i: i+8]))
+            ret.append(bits_to_byte(temp[i: i + 8]))
     return bytes(ret)
 
 
@@ -278,8 +277,27 @@ def generate_tree_general(node_lst: list[ReadNode],
 HuffmanTree(12, None, None)), \
 HuffmanTree(None, HuffmanTree(5, None, None), HuffmanTree(7, None, None)))
     """
-    # TODO: Implement this function
-    pass
+    root_node = node_lst[root_index]
+
+    if root_node.l_type == 0 and root_node.r_type == 0:
+        return HuffmanTree(None,
+                           HuffmanTree(root_node.l_data),
+                           HuffmanTree(root_node.r_data))
+
+    elif root_node.l_type == 0 and root_node.r_type == 1:
+        l_subtree = HuffmanTree(root_node.l_data, None, None)
+        r_subtree = generate_tree_general(node_lst, root_node.r_data)
+        return HuffmanTree(None, l_subtree, r_subtree)
+
+    elif root_node.l_type == 1 and root_node.r_type == 0:
+        l_subtree = generate_tree_general(node_lst, root_node.l_data)
+        r_subtree = HuffmanTree(root_node.r_data, None, None)
+        return HuffmanTree(None, l_subtree, r_subtree)
+
+    elif root_node.l_type == 1 and root_node.r_type == 1:
+        l_subtree = generate_tree_general(node_lst, root_node.l_data)
+        r_subtree = generate_tree_general(node_lst, root_node.r_data)
+        return HuffmanTree(None, l_subtree, r_subtree)
 
 
 def generate_tree_postorder(node_lst: list[ReadNode],
@@ -294,8 +312,30 @@ def generate_tree_postorder(node_lst: list[ReadNode],
 HuffmanTree(7, None, None)), \
 HuffmanTree(None, HuffmanTree(10, None, None), HuffmanTree(12, None, None)))
     """
-    # TODO: Implement this function
-    pass
+    # TODO adjust for empty inputs???
+    stack = []
+    for i in range(root_index + 1):
+        node = node_lst[i]
+
+        if node.l_type == 0 and node.r_type == 0:
+            left_child = HuffmanTree(node.l_data, None, None)
+            right_child = HuffmanTree(node.r_data, None, None)
+            stack.append(HuffmanTree(None, left_child, right_child))
+        elif node.l_type == 0 and node.r_type == 1:
+            left_child = HuffmanTree(node.l_data, None, None)
+            right_child = stack.pop()
+            stack.append(HuffmanTree(None, left_child, right_child))
+        elif node.l_type == 1 and node.r_type == 0:
+            left_child = stack.pop()
+            right_child = HuffmanTree(node.r_data, None, None)
+            stack.append(HuffmanTree(None, left_child, right_child))
+        elif node.l_type == 1 and node.r_type == 1:
+            right_child = stack.pop()
+            left_child = stack.pop()
+            stack.append(HuffmanTree(None, left_child, right_child))
+    if stack:
+        return stack[-1]
+    return HuffmanTree()
 
 
 def decompress_bytes(tree: HuffmanTree, text: bytes, size: int) -> bytes:
@@ -307,8 +347,26 @@ def decompress_bytes(tree: HuffmanTree, text: bytes, size: int) -> bytes:
              compress_bytes(b'helloworld', get_codes(tree)), len(b'helloworld'))
     b'helloworld'
     """
-    # TODO: Implement this function
-    pass
+    # TODO adjust spacing
+    bits = ''.join(byte_to_bits(b) for b in text)
+    chars = []
+    bit_index = 0
+
+    while len(chars) < size and bit_index < len(bits):
+        current_node = tree
+
+        while current_node.symbol is None and bit_index < len(bits):
+            bit = bits[bit_index]
+            if bit == '0':
+                current_node = current_node.left
+            else:
+                current_node = current_node.right
+            bit_index += 1
+
+        if current_node.symbol is not None:
+            chars.append(current_node.symbol)
+
+    return bytes(chars)
 
 
 def decompress_file(in_file: str, out_file: str) -> None:
@@ -350,7 +408,27 @@ def improve_tree(tree: HuffmanTree, freq_dict: dict[int, int]) -> None:
     >>> avg_length(tree, freq)
     2.31
     """
-    pass
+    nodes = []
+    freqs = sorted(freq_dict, key=lambda x: freq_dict[x])
+
+    def _recurse(huffman: HuffmanTree, code: str) -> None:
+        if not huffman:
+            return
+        if huffman.symbol is not None:
+            nodes.append((huffman, code))
+            return
+        if huffman.right is not None:
+            _recurse(huffman.left, code + '1')
+        if huffman.left is not None:
+            _recurse(huffman.right, code + '1')
+
+    _recurse(tree, '')
+
+    if nodes:
+        nodes.sort(key=lambda x: x[1], reverse=True)
+
+    for i in range(len(nodes)):
+        nodes[i][0].symbol = freqs[i]
 
 
 if __name__ == "__main__":
