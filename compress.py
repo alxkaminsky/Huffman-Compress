@@ -277,28 +277,29 @@ def generate_tree_general(node_lst: list[ReadNode],
 HuffmanTree(12, None, None)), \
 HuffmanTree(None, HuffmanTree(5, None, None), HuffmanTree(7, None, None)))
     """
-    root_node = node_lst[root_index]
+    if node_lst and root_index < len(node_lst):
+        root_node = node_lst[root_index]
 
-    if root_node.l_type == 0 and root_node.r_type == 0:
-        return HuffmanTree(None,
-                           HuffmanTree(root_node.l_data),
-                           HuffmanTree(root_node.r_data))
+        if root_node.l_type == 0 and root_node.r_type == 0:
+            return HuffmanTree(None,
+                               HuffmanTree(root_node.l_data),
+                               HuffmanTree(root_node.r_data))
 
-    elif root_node.l_type == 0 and root_node.r_type == 1:
-        l_subtree = HuffmanTree(root_node.l_data, None, None)
-        r_subtree = generate_tree_general(node_lst, root_node.r_data)
-        return HuffmanTree(None, l_subtree, r_subtree)
+        elif root_node.l_type == 0 and root_node.r_type == 1:
+            l_subtree = HuffmanTree(root_node.l_data, None, None)
+            r_subtree = generate_tree_general(node_lst, root_node.r_data)
+            return HuffmanTree(None, l_subtree, r_subtree)
 
-    elif root_node.l_type == 1 and root_node.r_type == 0:
-        l_subtree = generate_tree_general(node_lst, root_node.l_data)
-        r_subtree = HuffmanTree(root_node.r_data, None, None)
-        return HuffmanTree(None, l_subtree, r_subtree)
+        elif root_node.l_type == 1 and root_node.r_type == 0:
+            l_subtree = generate_tree_general(node_lst, root_node.l_data)
+            r_subtree = HuffmanTree(root_node.r_data, None, None)
+            return HuffmanTree(None, l_subtree, r_subtree)
 
-    elif root_node.l_type == 1 and root_node.r_type == 1:
-        l_subtree = generate_tree_general(node_lst, root_node.l_data)
-        r_subtree = generate_tree_general(node_lst, root_node.r_data)
-        return HuffmanTree(None, l_subtree, r_subtree)
-
+        elif root_node.l_type == 1 and root_node.r_type == 1:
+            l_subtree = generate_tree_general(node_lst, root_node.l_data)
+            r_subtree = generate_tree_general(node_lst, root_node.r_data)
+            return HuffmanTree(None, l_subtree, r_subtree)
+    return HuffmanTree()
 
 def generate_tree_postorder(node_lst: list[ReadNode],
                             root_index: int) -> HuffmanTree:
