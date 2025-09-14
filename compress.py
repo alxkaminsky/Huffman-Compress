@@ -459,15 +459,6 @@ if __name__ == "__main__":
 
     import python_ta
 
-    python_ta.check_all(config={
-        'allowed-io': ['compress_file', 'decompress_file'],
-        'allowed-import-modules': [
-            'python_ta', 'doctest', 'typing', '__future__',
-            'time', 'utils', 'huffman', 'random'
-        ],
-        'disable': ['W0401']
-    })
-
     mode = input(
         "Press c to compress, d to decompress, or other key to exit: ")
     if mode == "c":
