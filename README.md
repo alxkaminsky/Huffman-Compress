@@ -167,11 +167,3 @@ Contributions are welcome! Please feel free to submit issues, fork the repositor
 📚 Computer Science & Economics
 
 ---
-
-<div align="center">
-
-### 🌟 Star this repo if you found it helpful!
-
-*Made with ❤️ and lots of ☕*
-
-</div>
